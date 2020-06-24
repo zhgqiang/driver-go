@@ -144,9 +144,13 @@ func (rows *taosSqlRows) readRow(dest []driver.Value) error {
 			var index uint32
 			binaryVal := make([]byte, charLen)
 			for index = 0; index < charLen; index++ {
-				binaryVal[index] = *((*byte)(unsafe.Pointer(uintptr(currentRow) + uintptr(index))))
+				b := *((*byte)(unsafe.Pointer(uintptr(currentRow) + uintptr(index))))
+				if b == 0 {
+					break
+				}
+				binaryVal[index] = b
 			}
-			dest[i] = string(binaryVal[:])
+			dest[i] = string(binaryVal[:index])
 			break
 
 		case C.TSDB_DATA_TYPE_TIMESTAMP:
